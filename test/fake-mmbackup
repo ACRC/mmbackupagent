@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+import sys
+import random
+import datetime
+import time
+import string
+
+if len(sys.argv) != 2:
+    sys.exit(1)
+
+changed = random.randrange(10000,100000)
+updates = 0
+rebound = 0
+deleted = 0
+expired = random.randrange(100,10000)
+backedup = 0
+failed = 0
+filesystem = sys.argv[1]
+unsupported = random.randrange(0,100)
+server = "TSM01-CS-MMBK01"
+
+
+def ts():
+    return datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Y")
+
+print """\
+--------------------------------------------------------
+mmbackup: Backup of %s begins at %s.
+--------------------------------------------------------\
+""" % (filesystem,datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y"))
+
+print "%s mmbackup:Scanning file system %s"%(ts(),filesystem)
+sys.stdout.flush()
+time.sleep(random.randrange(10,20))
+print "%s mmbackup:Determining file system changes for %s [%s]." % (ts(),filesystem,server)
+time.sleep(random.randrange(10,20))
+print "%s mmbackup:changed=%s, expired=%s, unsupported=%s for server [%s]" % (ts(),changed,expired,unsupported,server)
+print "%s mmbackup:Sending files to the TSM server [%s changed, %s expired]." % (ts(),changed,expired)
+
+for i in range(0,changed):
+    if random.random() < 0.01:
+        # Lets fail this one
+        path = "/%s"%filesystem
+        for j in range(0,random.randrange(2,8)):
+            path += '/%s' % ''.join(random.choice(string.lowercase) for x in range(random.randrange(2,8)))        
+        print "ANS4005E Error processing '%s': file not found"%path
+        failed += 1
+    else:
+        backedup += 1
+    time.sleep(0.001)
+
+if failed > 0:
+    print "%s mmbackup:mmapplypolicy: Command failed.  Examine previous error messages to determine cause." % ts()
+    print "%s mmbackup:mmapplypolicy for Backup detected errors (rc=12).  Previous two messages may contain more details." % ts()
+    print "%s mmbackup:Completed policy backup run with 0 policy errors, %s files failed, 0 severe errors, returning rc=12." % (ts(),failed)
+
+transferred = backedup * random.randrange(1000,500000000)
+print """\
+mmbackup: TSM Summary Information:
+    Total number of objects inspected:  %s
+    Total number of objects backed up:  %s
+    Total number of objects updated:    0
+    Total number of objects rebound:    0
+    Total number of objects deleted:    0
+    Total number of objects expired:    %s
+    Total number of objects failed:     %s
+    Total number of bytes transferred:  %s\
+""" % (changed,backedup,expired,failed,transferred)
+
+print "%s mmbackup:Total %s files not backed up to TSM server(s)." % (ts(),failed)
+print "%s mmbackup:Analyzing audit log file /%s/mmbackup.audit.%s.%s" % (ts(),filesystem,filesystem,server)
+print "%s mmbackup:%s files not backed up for this server. ( failed:%s )" % (ts(),failed, failed)
+print "%s mmbackup:Worst TSM exit 12" % (ts())
+print "%s mmbackup:TSM failed with RC = 12 Please see the TSM log file for more info." % ts()
+print "%s mmbackup:Calculating partial backup results..." % (ts())
+print "%s mmbackup:%s failures were logged. Compensating shadow database..." % (ts(), failed)
+print "%s mmbackup:Analysis complete." % ts()
+print "    %s of %s failed or excluded paths removed from new shadow in 1 pass(es)." % (failed, failed)
+print "%s mmbackup:TSM server %s" % (ts(),server)
+print "    had %s failures or excluded paths and returned 12." % (failed)
+print "    Its shadow database has been updated."
+print "%s  mmbackup:Incremental backup completed with some skipped files." % (ts())
+print "    TSM had 0 severe errors and returned 12. See the TSM log file for more information."
+print "    %s files had errors, TSM audit logs recorded %s errors from 1 TSM servers, 0 TSM servers skipped." % (failed,failed) 
+print """\
+----------------------------------------------------------
+mmbackup: Backup of %s completed with some skipped files at %s.
+----------------------------------------------------------
+mmbackup: Command failed.  Examine previous error messages to determine cause.\
+""" % (filesystem,datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Z %Y"))
