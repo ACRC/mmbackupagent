@@ -30,19 +30,17 @@ class Client:
         if rc != None:
             newstats['rc'] = rc
             self.stats = newstats
-            self.finalreport()
+            self.report('finalreport')
         elif self.stats != newstats:
             self.stats = newstats
-            self.progressreport()
+            self.report('progressreport')
 
         return rc
 
-    def finalreport(self):
-        report.stdout(self.filesystem,self.stats)
-        report.reportsyslog(self.filesystem,self.stats)
-        #report.poststats(self.stats)
-
-    def progressreport(self):
-        report.stdout(self.filesystem,self.stats)
-        report.reportsyslog(self.filesystem,self.stats)
-        #report.poststats(self.stats)
+    def report(self,type):
+        if 'stdout' in self.config.config[type]:
+            report.stdout(self.filesystem,self.stats)
+        if 'syslog' in self.config.config[type]:
+            report.reportsyslog(self.filesystem,self.stats)
+        if 'rest' in self.config.config[type]:
+            report.rest(self.stats)

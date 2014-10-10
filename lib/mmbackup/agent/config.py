@@ -7,6 +7,23 @@ class Config:
         stream = open(self.findconfigfile(), 'r')
         self.config = yaml.load(stream)
 
+        if 'progressreport' not in self.config:
+            self.config['progressreport'] = ['stdout']
+        if 'finalreport' not in self.config:
+            self.config['finalreport'] = ['stdout']
+        if 'resturl' not in self.config:
+            if 'rest' in self.config['progressreport'] or \
+               'rest' in self.config['finalreprt']:
+                   print "ERROR: rest reporting in progressreport or finalreport config but no resturl set"
+                   sys.exit(1)
+        if 'filesystems' not in self.config:
+            print "ERROR: You must specify at least one filesystem to backup in the config"
+            sys.exit(1)
+        if 'mmbackupbin' not in self.config:
+            self.config['mmbackupbin'] = "/usr/lpp/mmfs/bin/mmbackup"
+        if 'logdir' not in self.config:
+            self.config['logdir'] = "/tmp/"
+
     def findconfigfile(self):
         """
         Find a valid config file to load on the filesystem
