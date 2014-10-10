@@ -8,6 +8,7 @@ class Client:
     def __init__(self,filesystem,config):
         self.config = config 
         self.filesystem = filesystem
+        self.stats = {}
         
         mmbackupbin = os.path.expanduser(self.config.config['mmbackupbin'])
         if not os.path.isfile(mmbackupbin):
@@ -24,20 +25,24 @@ class Client:
         self.log.close()
 
     def checkprogress(self):
-        self.stats = parselog.parselog(self.logfilename)
+        newstats = parselog.parselog(self.logfilename)
         rc = self.proc.poll()
         if rc != None:
-            self.stats['rc'] = rc
+            newstats['rc'] = rc
+            self.stats = newstats
             self.finalreport()
-        else:
+        elif self.stats != newstats:
+            self.stats = newstats
             self.progressreport()
 
         return rc
 
     def finalreport(self):
         report.stdout(self.filesystem,self.stats)
+        report.reportsyslog(self.filesystem,self.stats)
         #report.poststats(self.stats)
 
     def progressreport(self):
         report.stdout(self.filesystem,self.stats)
+        report.reportsyslog(self.filesystem,self.stats)
         #report.poststats(self.stats)
