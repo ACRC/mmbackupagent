@@ -16,15 +16,14 @@ class Agent:
         self.config = config.Config()
         self.clients = {}
 
-        filesystems = self.config.config['filesystems'] 
+        self.filesystems = self.config.config['filesystems'] 
 
-        for filesystem in filesystems:
-            self.clients[filesystem] = client.Client(filesystem,self.config)
             
-        self.checkprogress()
+        self.mainloop()
 
-    def checkprogress(self):
+    def mainloop(self):
         while True:
+            self.addclients()
             finishedprocs = []
             for key in self.clients:
                 if self.clients[key].checkprogress() != None:
@@ -35,7 +34,17 @@ class Agent:
                 if p:
                     del p
 
-            if len(self.clients) == 0:
+            if len(self.clients) == 0 and len(self.filesystems) == 0:
                 return 0
             time.sleep(10)
+
+    def addclients(self):
+        while True:
+            if len(self.filesystems) == 0:
+                break
+            if len(self.clients) < self.config.config['concurrent']:
+                filesystem = self.filesystems.pop()
+                self.clients[filesystem] = client.Client(filesystem,self.config)
+            else:
+                break
 
