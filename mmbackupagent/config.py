@@ -23,6 +23,8 @@ class Config:
             self.config['mmbackupbin'] = "/usr/lpp/mmfs/bin/mmbackup"
         if 'logdir' not in self.config:
             self.config['logdir'] = "/tmp/"
+        if 'concurrent' not in self.config:
+            self.config['concurrent'] = 1
 
     def findconfigfile(self):
         """
