@@ -8,6 +8,15 @@ A agent to trigger, monitor and report on the status of mmbackup instances.
  * Triggers concurrent client runs
  * Parses output to send reports to various outputs
 
+Installation
+------------
+
+Installation is done via `setuptools`. Basic installation steps are:
+
+ * `python setup.py build`
+ * `python setup.py install`
+
+More options can be found by running `./setup.py --help`
 
 Configuration
 -------------
