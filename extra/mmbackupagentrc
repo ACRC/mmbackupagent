@@ -1,0 +1,14 @@
+# Example configuration file.
+
+filesystems:
+ - fs01
+mmbackupbin: /usr/lpp/mmfs/bin/mmbackup
+resturl: http://localhost:3000
+logdir: /var/log/mmbackup/
+progressreport:
+ - stdout
+ - syslog
+finalreport:
+ - stdout
+ - syslog
+concurrent: 1
