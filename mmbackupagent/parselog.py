@@ -2,6 +2,7 @@
 import os.path
 import re
 import dateutil.parser
+import sys
 
 def parselog(inputfilename):
     stats = {}
@@ -68,3 +69,14 @@ def parselog(inputfilename):
     
     stats['stage'] = stage
     return stats
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print "USAGE: %s filename"%sys.argv[0]
+        sys.exit(1)
+    filename = sys.argv[1]
+    stats = parselog(filename)
+    for key in stats:
+        print "%s:\t%s"%(key,stats[key])
+
+
